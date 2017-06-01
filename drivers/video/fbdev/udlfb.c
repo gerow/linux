@@ -1105,8 +1105,17 @@ static int dlfb_ops_blank(int blank_mode, struct fb_info *info)
 	char *bufptr;
 	struct urb *urb;
 
-	pr_info("/dev/fb%d FB_BLANK mode %d --> %d\n",
-		info->node, dev->blank_mode, blank_mode);
+	/*
+	 * Xorg likes to habitually unblank when already unblanked so log these
+	 * kinds of events at debug.
+	 */
+	if (dev->blank_mode == FB_BLANK_UNBLANK &&
+	    blank_mode == FB_BLANK_UNBLANK)
+		pr_debug("/dev/fb%d FB_BLANK mode %d --> %d (FB_BLANK_UNBLANK --> FB_BLANK_UNBLANK)\n",
+			 info->node, FB_BLANK_UNBLANK, FB_BLANK_UNBLANK);
+	else
+		pr_info("/dev/fb%d FB_BLANK mode %d --> %d\n",
+			info->node, dev->blank_mode, blank_mode);
 
 	if ((dev->blank_mode == FB_BLANK_POWERDOWN) &&
 	    (blank_mode != FB_BLANK_POWERDOWN)) {
